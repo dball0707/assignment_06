@@ -1,7 +1,7 @@
 Write your reflection here.
 
-See reflection.md for what makes a good reflection — be specific, use the
-terminology from this assignment (REST API, endpoint, HTTP status code,
-raise_for_status, API key, form data vs. JSON body, rate limit, caching,
-json_normalize, record_path, meta, grain, opinion mining, named-entity
-recognition, prompt, system prompt, reasoning model), and make it actionable.
+The four API functions all followed the same pattern: build the URL, send the key in an X-API-KEY header, call requests.post with data= for the Azure endpoints or json= for the AI endpoints, then raise_for_status() before returning the JSON. The key itself lives in a .env file instead of the code, so it never gets committed.
+
+pipeline.py split into extract steps that call the API and cache the result, and transform steps that only reshape the cached JSON, so I could rerun the transforms without burning API calls. sentences_table and entities_table used pd.json_normalize with record_path and meta to flatten the JSON in one call, but opinions_table was too deep for that since a target points at its assessments through a relations list, so I used nested loops instead.
+
+I had two bugs worth remembering. sentiment_step used review["id"] to tag each document, but the real column was review_id, so it crashed with a KeyError until I checked the actual DataFrame instead of guessing. I also had entities_table filter correctly by category but still return every column, since I built a columns list and forgot to use it on the return line. Next time I want to print or inspect a DataFrame partway through a function instead of assuming a line did what the docstring says.
